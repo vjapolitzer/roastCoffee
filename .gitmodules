@@ -1,0 +1,9 @@
+[submodule "lib/MAX6675_lib"]
+	path = lib/MAX6675_lib
+	url = https://github.com/vjapolitzer/MAX6675_lib
+[submodule "lib/Triac_lib"]
+	path = lib/Triac_lib
+	url = https://github.com/vjapolitzer/Triac_lib
+[submodule "lib/PID_lib"]
+	path = lib/PID_lib
+	url = https://github.com/vjapolitzer/PID_lib
