@@ -22,44 +22,44 @@ double exampleTemp = 25.2;
 
 void setup()
 {
-  // Input = analogRead(PIN_INPUT);
-  // Setpoint = 100;
+    // Input = analogRead(PIN_INPUT);
+    // Setpoint = 100;
 
-  // myPID.start();
-  roasterDisplay.begin();
+    // myPID.start();
+    roasterDisplay.begin();
 }
 
 void loop()
 {
-  // Input = analogRead(PIN_INPUT);
-  // myPID.compute();
-  // analogWrite(PIN_OUTPUT, Output);
-  draw();
-  delay(UPDATE_PERIOD);
+    // Input = analogRead(PIN_INPUT);
+    // myPID.compute();
+    // analogWrite(PIN_OUTPUT, Output);
+    draw();
+    delay(UPDATE_PERIOD);
 }
 
 void draw()
 {
-  static double temp1, temp2, avg;
+    static double temp1, temp2, avg;
 
-  roasterDisplay.clearBuffer();
-  roasterDisplay.setFont(u8g_font_unifont);
+    roasterDisplay.clearBuffer();
+    roasterDisplay.setFont(u8g_font_unifont);
 
-  temp1 = tc1.readCelsius();
-  temp2 = tc2.readCelsius();
-  avg = (temp1 + temp2) / 2.0;
+    temp1 = tc1.readCelsius();
+    temp2 = tc2.readCelsius();
+    avg = (temp1 + temp2) / 2.0;
 
-  roasterDisplay.drawStr(0, 10, "Temp1:      C");
-  roasterDisplay.setCursor(53, 10);
-  roasterDisplay.print(temp1, 2);
+    roasterDisplay.drawStr(0, 10, "Temp1:      C");
+    roasterDisplay.setCursor(53, 10);
+    roasterDisplay.print(temp1, 2);
 
-  roasterDisplay.drawStr(0, 30, "Temp2:      C");
-  roasterDisplay.setCursor(53, 30);
-  roasterDisplay.print(temp2, 2);
+    roasterDisplay.drawStr(0, 30, "Temp2:      C");
+    roasterDisplay.setCursor(53, 30);
+    roasterDisplay.print(temp2, 2);
 
-  roasterDisplay.drawStr(0, 50, "Avg:        C");
-  roasterDisplay.setCursor(53, 50);
-  roasterDisplay.print(avg, 2);
+    roasterDisplay.drawStr(0, 50, "Avg:        C");
+    roasterDisplay.setCursor(53, 50);
+    roasterDisplay.print(avg, 2);
 
-  roasterDisplay.sendBuffer();
+    roasterDisplay.sendBuffer();
 }
