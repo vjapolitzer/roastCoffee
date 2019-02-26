@@ -19,9 +19,16 @@
 #define HEAT_PIN 5
 #define FAN_PIN 4
 
+// Period in ms to update temperature readings
 #define TC_UPDATE_PERIOD 300
 
-enum Mode {Menu, Roasting, Cooling};
+// Maximum roast time in minutes
+#define MAX_ROAST_TIME 14
+
+// Cooling temperature target
+#define COOLING_TEMP 40.0
+
+enum Mode {Menu, Roasting, Cooling, Summary};
 
 class Roaster
 {
@@ -32,15 +39,19 @@ class Roaster
 
     private:
         void setMode(Mode);
-        void readTemp();
+        bool readTemp();
         void drawDisp();
 
         static Mode mode;
-        static uint8_t menuPage;
-        static U8G2_SH1106_128X64_NONAME_F_4W_HW_SPI oled;
-        static MAX6675 tc1, tc2;
-        static Triac heater, fan;
-        static PID roastPID;
+        static uint8_t dispPage;                           // current page of mode to display
+        static uint8_t profileDuration;                    // Total minutes for profile
+        static double profile[];                           // minute by minute temperature targets
+        static uint8_t roastStage;                         // index in the profile index
+        static unsigned long roastTime;                    // for tracking number of seconds
+        static U8G2_SH1106_128X64_NONAME_F_4W_HW_SPI oled; // OLED display
+        static MAX6675 tc1, tc2;                           // Thermocouples
+        static Triac heater, fan;                          // Triacs for heating element and fan
+        static PID roastPID;                               // PID controller for heating
 
         static double inputPID, outputPID, setpointPID;
         static double tcTemp1, tcTemp2, tcTempAvg;
