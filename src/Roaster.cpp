@@ -76,6 +76,12 @@ bool Roaster::update()
                 Roaster::setMode(Cooling);
                 break;
             }
+
+            // TODO: Ramp down of fan halfway through profile
+
+            if (Roaster::roastPID.compute())
+                Roaster::heater.set((uint8_t)Roaster::outputPID);
+                
             break;
 
         case Cooling:
