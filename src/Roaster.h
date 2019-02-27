@@ -28,7 +28,7 @@
 // Cooling temperature target
 #define COOLING_TEMP 40.0
 
-enum Mode {Menu, Roasting, Cooling, Summary};
+enum Mode {Menu, Roasting, Cooling, Summary, Config};
 
 class Roaster
 {
@@ -58,6 +58,9 @@ class Roaster
         static double tcTemp1, tcTemp2, tcTempAvg;
         static double inputPID, outputPID, setpointPID;
         static double pGain, iGain, dGain;
+
+        // drawDisp helpers
+        
 };
 
 #endif

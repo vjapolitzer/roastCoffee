@@ -100,6 +100,9 @@ bool Roaster::update()
 
         case Summary:
             break;
+        
+        case Config:
+            break;
     }
     // Update the oled display
     Roaster::drawDisp();
@@ -133,6 +136,9 @@ void Roaster::setMode(Mode m)
             break;
 
         case Summary:
+            break;
+
+        case Config:
             break;
     }
     Roaster::dispPage = 0;
@@ -189,15 +195,64 @@ void Roaster::drawDisp()
     switch (Roaster::mode)
     {
         case Menu:
+            switch (Roaster::dispPage)
+            {
+                case 0: // Start roast
+                    break;
+                
+                case 1: // View temperatures
+                    Roaster::oled.drawStr(0, 10, "Temp1:      C");
+                    Roaster::oled.setCursor(53, 10);
+                    Roaster::oled.print(Roaster::tcTemp1, 2);
+
+                    Roaster::oled.drawStr(0, 30, "Temp2:      C");
+                    Roaster::oled.setCursor(53, 30);
+                    Roaster::oled.print(Roaster::tcTemp2, 2);
+
+                    Roaster::oled.drawStr(0, 50, "Avg:        C");
+                    Roaster::oled.setCursor(53, 50);
+                    Roaster::oled.print(Roaster::tcTempAvg, 2);
+                    break;
+
+                case 2: // View profile
+                    break;
+            }
             break;
 
         case Roasting:
+            switch (Roaster::dispPage)
+            {
+                case 0:
+                    break;
+                
+                case 1:
+                    break;
+            }
             break;
 
         case Cooling:
             break;
 
         case Summary:
+            switch (Roaster::dispPage)
+            {
+                case 0:
+                    break;
+                
+                case 1:
+                    break;
+            }
+            break;
+
+        case Config:
+            switch (Roaster::dispPage)
+            {
+                case 0:
+                    break;
+                
+                case 1:
+                    break;
+            }
             break;
     }
 }
