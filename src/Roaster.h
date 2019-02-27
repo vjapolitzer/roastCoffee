@@ -39,6 +39,7 @@ class Roaster
 
     private:
         void setMode(Mode);
+        void interpolateProfile();
         bool readTemp();
         void drawDisp();
 
@@ -46,15 +47,16 @@ class Roaster
         static uint8_t dispPage;                           // current page of mode to display
         static uint8_t profileDuration;                    // Total minutes for profile
         static double profile[];                           // minute by minute temperature targets
+        static double profileSlope[];                      // for linear interpolation of profile
         static uint8_t roastStage;                         // index in the profile index
-        static unsigned long roastTime;                    // for tracking number of seconds
+        static unsigned long roastTime;                    // elapsed roast time in seconds
         static U8G2_SH1106_128X64_NONAME_F_4W_HW_SPI oled; // OLED display
         static MAX6675 tc1, tc2;                           // Thermocouples
         static Triac heater, fan;                          // Triacs for heating element and fan
         static PID roastPID;                               // PID controller for heating
 
-        static double inputPID, outputPID, setpointPID;
         static double tcTemp1, tcTemp2, tcTempAvg;
+        static double inputPID, outputPID, setpointPID;
         static double pGain, iGain, dGain;
 };
 

@@ -6,10 +6,11 @@ uint8_t Roaster::dispPage = 0;
 
 // default profile
 uint8_t Roaster::profileDuration = 11;
-double profile[MAX_ROAST_TIME] = { 25.0, 60.0, 87.0, 112.0, 135.0, 155.0, 
-                                   171.0, 184.0, 193.0, 199.0, 204.0, 204.5 };
-uint8_t roastStage = 0;
-unsigned long roastTime = 0;
+double Roaster::profile[MAX_ROAST_TIME] = { 25.0, 60.0, 87.0, 112.0, 135.0, 155.0, 
+                                            171.0, 184.0, 193.0, 199.0, 204.0, 204.5 };
+double Roaster::profileSlope[MAX_ROAST_TIME - 1] = { 0 };
+uint8_t Roaster::roastStage = 0;
+unsigned long Roaster::roastTime = 0;
 
 U8G2_SH1106_128X64_NONAME_F_4W_HW_SPI Roaster::oled(U8G2_R2, DISP_CS, DISP_DC, DISP_RST);
 
@@ -18,6 +19,10 @@ MAX6675 Roaster::tc2(TC_PIN_2);
 
 Triac Roaster::heater(HEAT_PIN);
 Triac Roaster::fan(FAN_PIN);
+
+double Roaster::tcTemp1 = 25.0;
+double Roaster::tcTemp2 = 25.0;
+double Roaster::tcTempAvg = 25.0;
 
 double Roaster::inputPID = 25.0;
 double Roaster::outputPID = 0.0;
@@ -34,41 +39,42 @@ void Roaster::begin()
 {
     heater.begin();
     oled.begin();
+    Roaster::interpolateProfile();
 }
 
 bool Roaster::update()
 {
-    static bool updateError = false;
-
+    // Time tracking
     static unsigned long prevTime = millis();
-    unsigned long currTime = millis(); 
-    unsigned long timeChange = currTime - prevTime;
-    
-    unsigned long secondsIntoStage;
-    static double profileSlope = (Roaster::profile[1] - Roaster::profile[0]) / 60.0;;
+    unsigned long currTime; 
+    unsigned long timeChange;
 
+    // Time for profile interpolation and incrementing roast stage
+    unsigned long secondsIntoStage;
+
+    // Get the latest temperature reading if available
     Roaster::readTemp();
+
     switch (Roaster::mode)
     {
         case Menu:
             break;
 
         case Roasting:
+            currTime = millis(); 
+            timeChange = currTime - prevTime;
             if (timeChange >= 1000)
             {
-                Roaster::roastTime++;
+                Roaster::roastTime++; // One second has passed
 
                 secondsIntoStage = Roaster::roastTime % 60;
-
-                if (secondsIntoStage == 0)
-                {
-                    Roaster::roastStage++;
-                    profileSlope = (Roaster::profile[Roaster::roastStage + 1]
-                                    - Roaster::profile[Roaster::roastStage]) / 60.0;
-                }
-
+                // Increment to next stage every minute
+                if (secondsIntoStage == 0) Roaster::roastStage++;
+                // Update the temperature target for the PID controller
                 Roaster::setpointPID = Roaster::profile[Roaster::roastStage]
-                                       + profileSlope * secondsIntoStage;
+                                       + (Roaster::profileSlope[Roaster::roastStage]
+                                          * secondsIntoStage);
+                prevTime = currTime;
             }
 
             if (Roaster::roastTime >= Roaster::profileDuration * 60000)
@@ -81,7 +87,7 @@ bool Roaster::update()
 
             if (Roaster::roastPID.compute())
                 Roaster::heater.set((uint8_t)Roaster::outputPID);
-                
+
             break;
 
         case Cooling:
@@ -95,10 +101,10 @@ bool Roaster::update()
         case Summary:
             break;
     }
-
+    // Update the oled display
     Roaster::drawDisp();
 
-    return updateError;
+    return true;
 }
 
 void Roaster::setMode(Mode m)
@@ -133,16 +139,46 @@ void Roaster::setMode(Mode m)
     Roaster::mode = m;
 }
 
+void Roaster::interpolateProfile()
+{
+    for (int i = 0; i < Roaster::profileDuration; i++)
+    {
+        Roaster::profileSlope[i] = (Roaster::profile[i + 1]
+                                    - Roaster::profile[i]) / 60.0;
+    }
+}
+
 bool Roaster::readTemp()
 {
     static unsigned long prevTime = millis() - TC_UPDATE_PERIOD;
     unsigned long currTime = millis(); 
     unsigned long timeChange = currTime - prevTime;
+
+    double t1, t2;
     if (timeChange >= TC_UPDATE_PERIOD)
-    { // TODO: Handle NaN errors for TC disconnect
-        tcTemp1 = tc1.readCelsius();
-        tcTemp2 = tc2.readCelsius();
-        tcTempAvg = (tcTemp1 + tcTemp2) / 2.0;
+    { // TODO: Better handle NaN errors for TC disconnect
+        t1 = Roaster::tc1.readCelsius();
+        t2 = Roaster::tc2.readCelsius();
+
+        if (t1 == NAN && t2 == NAN) return false;
+
+        if (t1 != NAN && t2 != NAN)
+        {
+            Roaster::tcTemp1 = t1;
+            Roaster::tcTemp2 = t2;
+        }
+        else if (t1 == NAN && t2 != NAN)
+        {
+            Roaster::tcTemp1 = t2;
+            Roaster::tcTemp2 = t2;
+        }
+        else
+        {
+            Roaster::tcTemp1 = t1;
+            Roaster::tcTemp2 = t1;
+        }
+        Roaster::tcTempAvg = (Roaster::tcTemp1 + Roaster::tcTemp2) / 2.0;
+        prevTime = currTime;
         return true;
     }
     return false;
@@ -150,5 +186,18 @@ bool Roaster::readTemp()
 
 void Roaster::drawDisp()
 {
-    return;
+    switch (Roaster::mode)
+    {
+        case Menu:
+            break;
+
+        case Roasting:
+            break;
+
+        case Cooling:
+            break;
+
+        case Summary:
+            break;
+    }
 }
