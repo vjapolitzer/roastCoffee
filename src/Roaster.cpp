@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <stdio.h>
 #include "Roaster.h"
 
 Mode Roaster::mode = Menu;
@@ -33,7 +34,7 @@ double Roaster::iGain = 0.5;
 double Roaster::dGain = 3.0;
 PID Roaster::roastPID(&Roaster::inputPID, &Roaster::outputPID, &Roaster::setpointPID,
                       Roaster::pGain, Roaster::iGain, Roaster::dGain,
-                      (double)0, (double)166, Direct);
+                      (double)0, (double)165, Direct);
 
 void Roaster::begin()
 {
@@ -192,6 +193,7 @@ bool Roaster::readTemp()
 
 void Roaster::drawDisp()
 {
+    Roaster::oled.clearBuffer();
     switch (Roaster::mode)
     {
         case Menu:
@@ -255,4 +257,5 @@ void Roaster::drawDisp()
             }
             break;
     }
+    Roaster::oled.sendBuffer();
 }
