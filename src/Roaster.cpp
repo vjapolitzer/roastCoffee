@@ -21,9 +21,9 @@ MAX6675 Roaster::tc2(TC_PIN_2);
 Triac Roaster::heater(HEAT_PIN);
 Triac Roaster::fan(FAN_PIN);
 
-double Roaster::tcTemp1 = 25.0;
-double Roaster::tcTemp2 = 25.0;
-double Roaster::tcTempAvg = 25.0;
+double Roaster::t1 = 25.0;
+double Roaster::t2 = 25.0;
+double Roaster::tAvg = 25.0;
 
 double Roaster::inputPID = 25.0;
 double Roaster::outputPID = 0.0;
@@ -38,8 +38,9 @@ PID Roaster::roastPID(&Roaster::inputPID, &Roaster::outputPID, &Roaster::setpoin
 
 void Roaster::begin()
 {
-    heater.begin();
-    oled.begin();
+    Roaster::heater.begin();
+    Roaster::oled.begin();
+    Roaster::oled.setFont(u8g2_font_t0_13_tf);
     Roaster::interpolateProfile();
 }
 
@@ -92,7 +93,7 @@ bool Roaster::update()
             break;
 
         case Cooling:
-            if (Roaster::tcTempAvg <= COOLING_TEMP)
+            if (Roaster::tAvg <= COOLING_TEMP)
             {
                 Roaster::fan.off();
                 Roaster::setMode(Summary);
@@ -121,9 +122,9 @@ void Roaster::setMode(Mode m)
 
         case Roasting:
             while(!Roaster::readTemp());
-            Roaster::inputPID = Roaster::tcTempAvg;
-            Roaster::profile[0] = Roaster::tcTempAvg;
-            Roaster::setpointPID = Roaster::tcTempAvg;
+            Roaster::inputPID = Roaster::tAvg;
+            Roaster::profile[0] = Roaster::tAvg;
+            Roaster::setpointPID = Roaster::tAvg;
             Roaster::roastStage = 0;
             Roaster::roastTime = 1;
             Roaster::fan.on();
@@ -171,20 +172,20 @@ bool Roaster::readTemp()
 
         if (t1 != NAN && t2 != NAN)
         {
-            Roaster::tcTemp1 = t1;
-            Roaster::tcTemp2 = t2;
+            Roaster::t1 = t1;
+            Roaster::t2 = t2;
         }
         else if (t1 == NAN && t2 != NAN)
         {
-            Roaster::tcTemp1 = t2;
-            Roaster::tcTemp2 = t2;
+            Roaster::t1 = t2;
+            Roaster::t2 = t2;
         }
         else
         {
-            Roaster::tcTemp1 = t1;
-            Roaster::tcTemp2 = t1;
+            Roaster::t1 = t1;
+            Roaster::t2 = t1;
         }
-        Roaster::tcTempAvg = (Roaster::tcTemp1 + Roaster::tcTemp2) / 2.0;
+        Roaster::tAvg = (Roaster::t1 + Roaster::t2) / 2.0;
         prevTime = currTime;
         return true;
     }
@@ -193,6 +194,7 @@ bool Roaster::readTemp()
 
 void Roaster::drawDisp()
 {
+    char buf[STRING_BUFFER_SIZE];
     Roaster::oled.clearBuffer();
     switch (Roaster::mode)
     {
@@ -203,17 +205,14 @@ void Roaster::drawDisp()
                     break;
                 
                 case 1: // View temperatures
-                    Roaster::oled.drawStr(0, 10, "Temp1:      C");
-                    Roaster::oled.setCursor(53, 10);
-                    Roaster::oled.print(Roaster::tcTemp1, 2);
+                    sprintf(buf, "Temp1: %3d.%02d\xB0\x43", (int)Roaster::t1, (int)(Roaster::t1 * 100) % 100);
+                    Roaster::oled.drawStr(1, 10, buf);
 
-                    Roaster::oled.drawStr(0, 30, "Temp2:      C");
-                    Roaster::oled.setCursor(53, 30);
-                    Roaster::oled.print(Roaster::tcTemp2, 2);
+                    sprintf(buf, "Temp2: %3d.%02d\xB0\x43", (int)Roaster::t2, (int)(Roaster::t2 * 100) % 100);
+                    Roaster::oled.drawStr(1, 30, buf);
 
-                    Roaster::oled.drawStr(0, 50, "Avg:        C");
-                    Roaster::oled.setCursor(53, 50);
-                    Roaster::oled.print(Roaster::tcTempAvg, 2);
+                    sprintf(buf, "  Avg: %3d.%02d\xB0\x43", (int)Roaster::tAvg, (int)(Roaster::tAvg * 100) % 100);
+                    Roaster::oled.drawStr(1, 50, buf);
                     break;
 
                 case 2: // View profile

@@ -28,6 +28,8 @@
 // Cooling temperature target
 #define COOLING_TEMP 40.0
 
+#define STRING_BUFFER_SIZE 20
+
 enum Mode {Menu, Roasting, Cooling, Summary, Config};
 
 class Roaster
@@ -55,7 +57,7 @@ class Roaster
         static Triac heater, fan;                          // Triacs for heating element and fan
         static PID roastPID;                               // PID controller for heating
 
-        static double tcTemp1, tcTemp2, tcTempAvg;
+        static double t1, t2, tAvg;
         static double inputPID, outputPID, setpointPID;
         static double pGain, iGain, dGain;
 
