@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <stdio.h>
 #include "Roaster.h"
 
 Mode Roaster::mode = Menu;
@@ -20,6 +19,7 @@ MAX6675 Roaster::tc2(TC_PIN_2);
 
 Triac Roaster::heater(HEAT_PIN);
 Triac Roaster::fan(FAN_PIN);
+uint8_t Roaster::fanSpeed = 0;
 
 double Roaster::t1 = 25.0;
 double Roaster::t2 = 25.0;
@@ -41,7 +41,6 @@ void Roaster::begin()
     Roaster::heater.begin();
     Roaster::oled.begin();
     Roaster::oled.setFont(u8g2_font_t0_13_tf);
-    Roaster::interpolateProfile();
 }
 
 bool Roaster::update()
@@ -63,11 +62,14 @@ bool Roaster::update()
             break;
 
         case Roasting:
+            // Time tracking
             currTime = millis(); 
             timeChange = currTime - prevTime;
+
+            // Update the PID setpoint according the profile, once per second
             if (timeChange >= 1000)
             {
-                Roaster::roastTime++; // One second has passed
+                Roaster::roastTime++;
 
                 secondsIntoStage = Roaster::roastTime % 60;
                 // Increment to next stage every minute
@@ -76,16 +78,22 @@ bool Roaster::update()
                 Roaster::setpointPID = Roaster::profile[Roaster::roastStage]
                                        + (Roaster::profileSlope[Roaster::roastStage]
                                           * secondsIntoStage);
+                
+                // Ramp down fan to 50% halfway through the roast
+                if (Roaster::roastTime >= Roaster::profileDuration * 30
+                    && Roaster::fanSpeed > 83)
+                {
+                    Roaster::fan.set(--Roaster::fanSpeed);
+                }
+
                 prevTime = currTime;
             }
 
-            if (Roaster::roastTime >= Roaster::profileDuration * 60000)
+            if (Roaster::roastTime >= Roaster::profileDuration * 60)
             {
                 Roaster::setMode(Cooling);
                 break;
             }
-
-            // TODO: Ramp down of fan halfway through profile
 
             if (Roaster::roastPID.compute())
                 Roaster::heater.set((uint8_t)Roaster::outputPID);
@@ -121,12 +129,17 @@ void Roaster::setMode(Mode m)
             break;
 
         case Roasting:
+            // Ensure we have a valid temperature
             while(!Roaster::readTemp());
+            // Initialize PID variables to room temp
             Roaster::inputPID = Roaster::tAvg;
             Roaster::profile[0] = Roaster::tAvg;
             Roaster::setpointPID = Roaster::tAvg;
+            Roaster::interpolateProfile();
             Roaster::roastStage = 0;
-            Roaster::roastTime = 1;
+            Roaster::roastTime = 0;
+            Roaster::fanSpeed = 165;
+            // And we are off to the races!
             Roaster::fan.on();
             Roaster::roastPID.start();
             break;
@@ -190,71 +203,4 @@ bool Roaster::readTemp()
         return true;
     }
     return false;
-}
-
-void Roaster::drawDisp()
-{
-    char buf[STRING_BUFFER_SIZE];
-    Roaster::oled.clearBuffer();
-    switch (Roaster::mode)
-    {
-        case Menu:
-            switch (Roaster::dispPage)
-            {
-                case 0: // Start roast
-                    break;
-                
-                case 1: // View temperatures
-                    sprintf(buf, "Temp1: %3d.%02d\xB0\x43", (int)Roaster::t1, (int)(Roaster::t1 * 100) % 100);
-                    Roaster::oled.drawStr(1, 10, buf);
-
-                    sprintf(buf, "Temp2: %3d.%02d\xB0\x43", (int)Roaster::t2, (int)(Roaster::t2 * 100) % 100);
-                    Roaster::oled.drawStr(1, 30, buf);
-
-                    sprintf(buf, "  Avg: %3d.%02d\xB0\x43", (int)Roaster::tAvg, (int)(Roaster::tAvg * 100) % 100);
-                    Roaster::oled.drawStr(1, 50, buf);
-                    break;
-
-                case 2: // View profile
-                    break;
-            }
-            break;
-
-        case Roasting:
-            switch (Roaster::dispPage)
-            {
-                case 0:
-                    break;
-                
-                case 1:
-                    break;
-            }
-            break;
-
-        case Cooling:
-            break;
-
-        case Summary:
-            switch (Roaster::dispPage)
-            {
-                case 0:
-                    break;
-                
-                case 1:
-                    break;
-            }
-            break;
-
-        case Config:
-            switch (Roaster::dispPage)
-            {
-                case 0:
-                    break;
-                
-                case 1:
-                    break;
-            }
-            break;
-    }
-    Roaster::oled.sendBuffer();
 }

@@ -55,11 +55,11 @@ class Roaster
         static U8G2_SH1106_128X64_NONAME_F_4W_HW_SPI oled; // OLED display
         static MAX6675 tc1, tc2;                           // Thermocouples
         static Triac heater, fan;                          // Triacs for heating element and fan
-        static PID roastPID;                               // PID controller for heating
-
-        static double t1, t2, tAvg;
-        static double inputPID, outputPID, setpointPID;
+        static uint8_t fanSpeed;                           // Fan power level (0-165)
+        static double t1, t2, tAvg;                        // Thermocouple readings
+        static double inputPID, outputPID, setpointPID;    // PID variables
         static double pGain, iGain, dGain;
+        static PID roastPID;                               // PID controller for heating
 
         // drawDisp helpers
         
