@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 #include <U8g2lib.h>
-#include <SPI.h>
 #include "MAX6675_lib.h"
 #include "PID_lib.h"
 #include "Triac_lib.h"
@@ -22,21 +21,40 @@
 // Period in ms to update temperature readings
 #define TC_UPDATE_PERIOD 300
 
+// Period in ms to reject extra button presses
+#define BUTTON_UPDATE_PERIOD 200
+
 // Maximum roast time in minutes
 #define MAX_ROAST_TIME 14
 
 // Cooling temperature target
 #define COOLING_TEMP 40.0
 
+// Number of MENU pages
+#define MENU_PAGES 3
+
+// Number of ROASTING pages
+#define ROASTING_PAGES 2
+
+// Number of ROASTING pages
+#define ROASTING_PAGES 2
+
+// Number of SUMMARY pages
+#define SUMMARY_PAGES 2
+
+// Number of CONFIG pages
+#define CONFIG_PAGES 2
+
 #define STRING_BUFFER_SIZE 20
 
 enum Mode {Menu, Roasting, Cooling, Summary, Config};
+enum Button {NoB, UpB, DownB, BackB, OkB};
 
 class Roaster
 {
     public:
         void begin();
-        void input(uint8_t);
+        void input(uint16_t);
         bool update();
 
     private:
@@ -46,6 +64,8 @@ class Roaster
         void drawDisp();
 
         static Mode mode;
+        static Button pressed;
+        static uint16_t buttonDebug;
         static uint8_t dispPage;                           // current page of mode to display
         static uint8_t profileDuration;                    // Total minutes for profile
         static double profile[];                           // minute by minute temperature targets

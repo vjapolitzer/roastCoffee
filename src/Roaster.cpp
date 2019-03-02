@@ -1,7 +1,9 @@
 #include <Arduino.h>
+#include <SPI.h>
 #include "Roaster.h"
 
 Mode Roaster::mode = Menu;
+Button Roaster::pressed = NoB;
 uint8_t Roaster::dispPage = 0;
 
 // default profile
@@ -43,6 +45,35 @@ void Roaster::begin()
     Roaster::oled.setFont(u8g2_font_t0_13_tf);
 }
 
+void Roaster::input(uint16_t buttonReadVal)
+{
+    static unsigned long prevTime = millis() - BUTTON_UPDATE_PERIOD;
+    unsigned long currTime = millis(); 
+    unsigned long timeChange = currTime - prevTime;
+
+    if (timeChange >= BUTTON_UPDATE_PERIOD)
+    {
+        switch ((buttonReadVal / 100) * 100)
+        {
+            case 500:
+                Roaster::pressed = OkB;
+                break;
+            case 700:
+                Roaster::pressed = BackB;
+                break;
+            case 800:
+                Roaster::pressed = UpB;
+                break;
+            case 900:
+                Roaster::pressed = DownB;
+                break;
+            default:
+                Roaster::pressed = NoB;
+        }
+        prevTime = currTime;
+    }
+}
+
 bool Roaster::update()
 {
     // Time tracking
@@ -59,6 +90,17 @@ bool Roaster::update()
     switch (Roaster::mode)
     {
         case Menu:
+            switch (Roaster::pressed)
+            {
+                case UpB:
+                    Roaster::dispPage = (Roaster::dispPage + 1) % MENU_PAGES;
+                    break;
+                case DownB:
+                    Roaster::dispPage = (Roaster::dispPage + 2) % MENU_PAGES;
+                    break;
+                default:
+                    break;
+            }
             break;
 
         case Roasting:
@@ -116,6 +158,8 @@ bool Roaster::update()
     }
     // Update the oled display
     Roaster::drawDisp();
+    // Reset input
+    Roaster::pressed = NoB;
 
     return true;
 }
@@ -125,11 +169,11 @@ void Roaster::setMode(Mode m)
     switch (m)
     {
         case Menu:
-            // TODO: set page to summary page
             break;
 
         case Roasting:
             // Ensure we have a valid temperature
+            // TODO: add a timeout here
             while(!Roaster::readTemp());
             // Initialize PID variables to room temp
             Roaster::inputPID = Roaster::tAvg;

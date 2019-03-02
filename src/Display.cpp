@@ -12,6 +12,8 @@ void Roaster::drawDisp()
             switch (Roaster::dispPage)
             {
                 case 0: // Start roast
+                    sprintf(buf, "Main Screen");
+                    Roaster::oled.drawStr(1, 10, buf);
                     break;
                 
                 case 1: // View temperatures
@@ -29,6 +31,8 @@ void Roaster::drawDisp()
                     break;
 
                 case 2: // View profile
+                    sprintf(buf, "View Profile");
+                    Roaster::oled.drawStr(1, 10, buf);
                     break;
             }
             break;
