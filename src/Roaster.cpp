@@ -45,7 +45,7 @@ void Roaster::begin()
     Roaster::oled.setFont(u8g2_font_t0_13_tf);
 }
 
-bool Roaster::update()
+void Roaster::update()
 {
     // Time tracking
     static unsigned long prevTime = millis();
@@ -118,8 +118,6 @@ bool Roaster::update()
         Roaster::buttonPressed = NoB;
     }
     Roaster::drawDisp();
-
-    return true;
 }
 
 void Roaster::setMode(Mode m)

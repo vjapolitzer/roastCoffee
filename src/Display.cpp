@@ -42,7 +42,7 @@ void Roaster::drawDisp()
                     Roaster::oled.drawStr(10, 10, buf);
                     Roaster::drawProfile();
                     break;
-                case 3: // Confirmation
+                case MENU_PAGES: // Confirmation
                     sprintf(buf, "Start Roast?");
                     Roaster::oled.drawStr(20, 35, buf);
                     break;

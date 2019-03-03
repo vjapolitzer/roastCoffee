@@ -45,34 +45,63 @@
 
 #define STRING_BUFFER_SIZE 20
 
+// enum for different machine states
 enum Mode {Menu, Roasting, Cooling, Summary, Config};
+// enum for different button presses
 enum Button {NoB, UpB, DownB, BackB, OkB};
 
 class Roaster
 {
     public:
+        /* begin()
+        * ...Starts up the Triac and display drivers
+        * ...Only call ONCE
+        * ...Returns:
+        * ......Nothing
+        */
         void begin();
+
+        /* input(...)
+        * Accepts analogRead()/100 values
+        * Sets internal variable for input handling
+        * Configure the values in defines above
+        * ...Parameters:
+        * ......uint8_t buttonReadVal
+        * ...Returns:
+        * ......Nothing
+        */
         void input(uint8_t);
-        bool update();
+
+        /* update()
+        * Runs the machine, place in loop()
+        * ...Returns:
+        * ......Nothing
+        */
+        void update();
 
     private:
-        void setMode(Mode);
-        void interpolateProfile();
-        bool readTemp();
-        void handleInput();
+        void setMode(Mode);        // Transition between modes
+        void interpolateProfile(); // For smooth profile curve
+        bool readTemp();           // Gets thermocouple temps
+
+        // Input handling functions, defined in Input.cpp
+        void handleInput();         
         void nextPage();
         void prevPage();
         uint8_t getNumPages();
-        void drawDisp();
 
-        static Mode mode;
-        static Button buttonPressed;
-        static uint8_t dispPage;                           // current page of mode to display
+        // Display functions, defined in Display.cpp
+        void drawDisp();
+        void drawProfile();
+
+        static Mode mode;                                  // Current state of machine
+        static uint8_t dispPage;                           // Current page of mode to display
+        static Button buttonPressed;                       // Holds the status of the buttons
         static uint8_t profileDuration;                    // Total minutes for profile
-        static double profile[];                           // minute by minute temperature targets
-        static double profileSlope[];                      // for linear interpolation of profile
-        static uint8_t roastStage;                         // index in the profile index
-        static unsigned long roastTime;                    // elapsed roast time in seconds
+        static double profile[];                           // Minute by minute temperature targets
+        static double profileSlope[];                      // For linear interpolation of profile
+        static uint8_t roastStage;                         // Index in the profile index
+        static unsigned long roastTime;                    // Elapsed roast time in seconds
         static U8G2_SH1106_128X64_NONAME_F_4W_HW_SPI oled; // OLED display
         static MAX6675 tc1, tc2;                           // Thermocouples
         static Triac heater, fan;                          // Triacs for heating element and fan
@@ -81,9 +110,6 @@ class Roaster
         static double inputPID, outputPID, setpointPID;    // PID variables
         static double pGain, iGain, dGain;
         static PID roastPID;                               // PID controller for heating
-
-        // drawDisp helpers
-        void drawProfile();
 };
 
 #endif
