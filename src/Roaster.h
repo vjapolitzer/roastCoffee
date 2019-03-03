@@ -22,13 +22,13 @@
 #define TC_UPDATE_PERIOD 300
 
 // Period in ms to reject extra button presses
-#define BUTTON_UPDATE_PERIOD 200
+#define BUTTON_UPDATE_PERIOD 100
 
 // Button analogRead values
-#define OK_BUTTON_VAL 500
-#define BACK_BUTTON_VAL 700
-#define UP_BUTTON_VAL 800
-#define DOWN_BUTTON_VAL 900
+#define OK_BUTTON_VAL 5
+#define BACK_BUTTON_VAL 7
+#define UP_BUTTON_VAL 8
+#define DOWN_BUTTON_VAL 9
 
 // Maximum roast time in minutes
 #define MAX_ROAST_TIME 14
@@ -52,7 +52,7 @@ class Roaster
 {
     public:
         void begin();
-        void input(uint16_t);
+        void input(uint8_t);
         bool update();
 
     private:
@@ -83,7 +83,7 @@ class Roaster
         static PID roastPID;                               // PID controller for heating
 
         // drawDisp helpers
-        
+        void drawProfile();
 };
 
 #endif

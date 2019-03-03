@@ -8,7 +8,7 @@ uint8_t Roaster::dispPage = 0;
 
 // default profile
 uint8_t Roaster::profileDuration = 11;
-double Roaster::profile[MAX_ROAST_TIME] = { 25.0, 60.0, 87.0, 112.0, 135.0, 155.0, 
+double Roaster::profile[MAX_ROAST_TIME] = { 25.0, 58.0, 87.0, 113.0, 136.0, 155.0,
                                             171.0, 184.0, 193.0, 199.0, 204.0, 204.5 };
 double Roaster::profileSlope[MAX_ROAST_TIME - 1] = { 0 };
 uint8_t Roaster::roastStage = 0;

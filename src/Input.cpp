@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "Roaster.h"
 
-void Roaster::input(uint16_t buttonReadVal)
+void Roaster::input(uint8_t buttonReadVal)
 {
     static unsigned long prevTime = millis() - BUTTON_UPDATE_PERIOD;
     unsigned long currTime = millis(); 
@@ -9,7 +9,7 @@ void Roaster::input(uint16_t buttonReadVal)
 
     if (timeChange >= BUTTON_UPDATE_PERIOD)
     {
-        switch ((buttonReadVal / 100) * 100)
+        switch (buttonReadVal)
         {
             case OK_BUTTON_VAL:
                 Roaster::buttonPressed = OkB;
