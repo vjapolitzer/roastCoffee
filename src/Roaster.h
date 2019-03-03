@@ -24,25 +24,23 @@
 // Period in ms to reject extra button presses
 #define BUTTON_UPDATE_PERIOD 200
 
+// Button analogRead values
+#define OK_BUTTON_VAL 500
+#define BACK_BUTTON_VAL 700
+#define UP_BUTTON_VAL 800
+#define DOWN_BUTTON_VAL 900
+
 // Maximum roast time in minutes
 #define MAX_ROAST_TIME 14
 
 // Cooling temperature target
 #define COOLING_TEMP 40.0
 
-// Number of MENU pages
+// Number of pages in different modes
 #define MENU_PAGES 3
-
-// Number of ROASTING pages
 #define ROASTING_PAGES 2
-
-// Number of ROASTING pages
-#define ROASTING_PAGES 2
-
-// Number of SUMMARY pages
+#define COOLING_PAGES 1
 #define SUMMARY_PAGES 2
-
-// Number of CONFIG pages
 #define CONFIG_PAGES 2
 
 #define STRING_BUFFER_SIZE 20
@@ -61,11 +59,14 @@ class Roaster
         void setMode(Mode);
         void interpolateProfile();
         bool readTemp();
+        void handleInput();
+        void nextPage();
+        void prevPage();
+        uint8_t getNumPages();
         void drawDisp();
 
         static Mode mode;
-        static Button pressed;
-        static uint16_t buttonDebug;
+        static Button buttonPressed;
         static uint8_t dispPage;                           // current page of mode to display
         static uint8_t profileDuration;                    // Total minutes for profile
         static double profile[];                           // minute by minute temperature targets

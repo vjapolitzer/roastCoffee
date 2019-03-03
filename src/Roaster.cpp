@@ -3,7 +3,7 @@
 #include "Roaster.h"
 
 Mode Roaster::mode = Menu;
-Button Roaster::pressed = NoB;
+Button Roaster::buttonPressed = NoB;
 uint8_t Roaster::dispPage = 0;
 
 // default profile
@@ -45,35 +45,6 @@ void Roaster::begin()
     Roaster::oled.setFont(u8g2_font_t0_13_tf);
 }
 
-void Roaster::input(uint16_t buttonReadVal)
-{
-    static unsigned long prevTime = millis() - BUTTON_UPDATE_PERIOD;
-    unsigned long currTime = millis(); 
-    unsigned long timeChange = currTime - prevTime;
-
-    if (timeChange >= BUTTON_UPDATE_PERIOD)
-    {
-        switch ((buttonReadVal / 100) * 100)
-        {
-            case 500:
-                Roaster::pressed = OkB;
-                break;
-            case 700:
-                Roaster::pressed = BackB;
-                break;
-            case 800:
-                Roaster::pressed = UpB;
-                break;
-            case 900:
-                Roaster::pressed = DownB;
-                break;
-            default:
-                Roaster::pressed = NoB;
-        }
-        prevTime = currTime;
-    }
-}
-
 bool Roaster::update()
 {
     // Time tracking
@@ -90,17 +61,6 @@ bool Roaster::update()
     switch (Roaster::mode)
     {
         case Menu:
-            switch (Roaster::pressed)
-            {
-                case UpB:
-                    Roaster::dispPage = (Roaster::dispPage + 1) % MENU_PAGES;
-                    break;
-                case DownB:
-                    Roaster::dispPage = (Roaster::dispPage + 2) % MENU_PAGES;
-                    break;
-                default:
-                    break;
-            }
             break;
 
         case Roasting:
@@ -143,11 +103,7 @@ bool Roaster::update()
             break;
 
         case Cooling:
-            if (Roaster::tAvg <= COOLING_TEMP)
-            {
-                Roaster::fan.off();
-                Roaster::setMode(Summary);
-            }
+            if (Roaster::tAvg <= COOLING_TEMP) Roaster::setMode(Summary);
             break;
 
         case Summary:
@@ -156,10 +112,12 @@ bool Roaster::update()
         case Config:
             break;
     }
-    // Update the oled display
+    if (Roaster::buttonPressed != NoB)
+    {
+        Roaster::handleInput();
+        Roaster::buttonPressed = NoB;
+    }
     Roaster::drawDisp();
-    // Reset input
-    Roaster::pressed = NoB;
 
     return true;
 }
@@ -195,6 +153,7 @@ void Roaster::setMode(Mode m)
             break;
 
         case Summary:
+            Roaster::fan.off();
             break;
 
         case Config:
