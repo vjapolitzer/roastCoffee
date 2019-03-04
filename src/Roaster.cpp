@@ -31,9 +31,9 @@ double Roaster::inputPID = 25.0;
 double Roaster::outputPID = 0.0;
 double Roaster::setpointPID = 25.0;
 
-double Roaster::pGain = 10.0;
-double Roaster::iGain = 0.5;
-double Roaster::dGain = 3.0;
+double Roaster::pGain = 8.0;
+double Roaster::iGain = 0.3;
+double Roaster::dGain = 0.0;
 PID Roaster::roastPID(&Roaster::inputPID, &Roaster::outputPID, &Roaster::setpointPID,
                       Roaster::pGain, Roaster::iGain, Roaster::dGain,
                       (double)0, (double)165, Direct);
@@ -103,7 +103,7 @@ void Roaster::update()
             break;
 
         case Cooling:
-            if (Roaster::tAvg <= COOLING_TEMP) Roaster::setMode(Summary);
+            if (Roaster::tAvg <= COOLING_TEMP) Roaster::setMode(Menu); //Roaster::setMode(Summary);
             break;
 
         case Summary:
@@ -125,6 +125,7 @@ void Roaster::setMode(Mode m)
     switch (m)
     {
         case Menu:
+            Roaster::fan.off();
             break;
 
         case Roasting:

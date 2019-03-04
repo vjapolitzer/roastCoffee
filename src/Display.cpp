@@ -42,6 +42,7 @@ void Roaster::drawDisp()
                     Roaster::oled.drawStr(10, 10, buf);
                     Roaster::drawProfile();
                     break;
+
                 case MENU_PAGES: // Confirmation
                     sprintf(buf, "Start Roast?");
                     Roaster::oled.drawStr(20, 35, buf);
@@ -53,14 +54,43 @@ void Roaster::drawDisp()
             switch (Roaster::dispPage)
             {
                 case 0:
+                    sprintf(buf, "Time: %2dm %2ds",
+                            (int)Roaster::roastTime / 60, (int)Roaster::roastTime % 60);
+                    Roaster::oled.drawStr(1, 10, buf);
+
+                    sprintf(buf, "Actual: %3d.%02d\xB0\x43",
+                            (int)Roaster::tAvg, (int)(Roaster::tAvg * 100) % 100);
+                    Roaster::oled.drawStr(1, 25, buf);
+
+                    sprintf(buf, "Target: %3d.%02d\xB0\x43",
+                            (int)Roaster::setpointPID, (int)(Roaster::setpointPID * 100) % 100);
+                    Roaster::oled.drawStr(1, 40, buf);
+
+                    sprintf(buf, "Heat:%3d Fan:%3d",
+                            (int)(Roaster::heater.getPower() * 100 / 165), (int)(Roaster::fan.getPower() * 100 / 165));
+                    Roaster::oled.drawStr(1, 55, buf);
                     break;
                 
                 case 1:
+                    break;
+
+                case ROASTING_PAGES: // Confirmation
+                    sprintf(buf, "Stop Roast?");
+                    Roaster::oled.drawStr(20, 35, buf);
                     break;
             }
             break;
 
         case Cooling:
+            sprintf(buf, "Cooling");
+            Roaster::oled.drawStr(10, 10, buf);
+
+            sprintf(buf, "Actual: %3d.%02d\xB0\x43",
+                    (int)Roaster::tAvg, (int)(Roaster::tAvg * 100) % 100);
+            Roaster::oled.drawStr(1, 25, buf);
+
+            sprintf(buf, "Target: 40.00\xB0\x43");
+            Roaster::oled.drawStr(1, 40, buf);
             break;
 
         case Summary:

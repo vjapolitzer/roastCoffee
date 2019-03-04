@@ -101,8 +101,7 @@ void Roaster::handleInput()
                             break;
 
                         case OkB:
-                            Roaster::dispPage = 0;
-                            // Roaster::setMode(Roasting);
+                            Roaster::setMode(Roasting);
                             break;
 
                         default:
@@ -116,9 +115,42 @@ void Roaster::handleInput()
             switch (Roaster::dispPage)
             {
                 case 0:
+                    switch (Roaster::buttonPressed)
+                    {
+                        case UpB:
+                            // Roaster::nextPage();
+                            break;
+                        
+                        case DownB:
+                            // Roaster::prevPage();
+                            break;
+
+                        case BackB:
+                            Roaster::dispPage = ROASTING_PAGES;
+                            break;
+
+                        default:
+                            break;
+                    }
                     break;
                 
                 case 1:
+                    break;
+
+                case ROASTING_PAGES: // Confirmation
+                    switch (Roaster::buttonPressed)
+                    {
+                        case BackB:
+                            Roaster::dispPage = 0;
+                            break;
+
+                        case OkB:
+                            Roaster::setMode(Cooling);
+                            break;
+
+                        default:
+                            break;
+                    }
                     break;
             }
             break;

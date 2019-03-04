@@ -34,7 +34,7 @@
 #define MAX_ROAST_TIME 14
 
 // Cooling temperature target
-#define COOLING_TEMP 40.0
+#define COOLING_TEMP 50.0
 
 // Number of pages in different modes
 #define MENU_PAGES 3
