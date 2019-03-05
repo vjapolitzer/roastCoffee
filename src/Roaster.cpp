@@ -36,7 +36,7 @@ double Roaster::iGain = 0.3;
 double Roaster::dGain = 0.0;
 PID Roaster::roastPID(&Roaster::inputPID, &Roaster::outputPID, &Roaster::setpointPID,
                       Roaster::pGain, Roaster::iGain, Roaster::dGain,
-                      (double)0, (double)165, Direct);
+                      (double)0, (double)165, Direct, TC_UPDATE_PERIOD);
 
 void Roaster::begin()
 {
