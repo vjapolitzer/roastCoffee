@@ -89,7 +89,7 @@ void Roaster::drawDisp()
                     (int)Roaster::tAvg, (int)(Roaster::tAvg * 100) % 100);
             Roaster::oled.drawStr(1, 25, buf);
 
-            sprintf(buf, "Target: 40.00\xB0\x43");
+            sprintf(buf, "Target: 50.00\xB0\x43");
             Roaster::oled.drawStr(1, 40, buf);
             break;
 

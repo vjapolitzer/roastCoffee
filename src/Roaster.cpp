@@ -27,16 +27,11 @@ double Roaster::t1 = 25.0;
 double Roaster::t2 = 25.0;
 double Roaster::tAvg = 25.0;
 
-double Roaster::inputPID = 25.0;
-double Roaster::outputPID = 0.0;
+int16_t Roaster::outputPID = 0;
 double Roaster::setpointPID = 25.0;
 
-double Roaster::pGain = 8.0;
-double Roaster::iGain = 0.3;
-double Roaster::dGain = 0.0;
-PID Roaster::roastPID(&Roaster::inputPID, &Roaster::outputPID, &Roaster::setpointPID,
-                      Roaster::pGain, Roaster::iGain, Roaster::dGain,
-                      (double)0, (double)165, Direct, TC_UPDATE_PERIOD);
+PID Roaster::roastPID(100, 1, 0,
+                      0, 165, TC_UPDATE_PERIOD);
 
 void Roaster::begin()
 {
@@ -80,10 +75,11 @@ void Roaster::update()
                 Roaster::setpointPID = Roaster::profile[Roaster::roastStage]
                                        + (Roaster::profileSlope[Roaster::roastStage]
                                           * secondsIntoStage);
+                Roaster::roastPID.set(Roaster::setpointPID);
                 
-                // Ramp down fan to 50% halfway through the roast
+                // Ramp down fan to 88% halfway through the roast
                 if (Roaster::roastTime >= Roaster::profileDuration * 30
-                    && Roaster::fanSpeed > 83)
+                    && Roaster::fanSpeed > 146)
                 {
                     Roaster::fan.set(--Roaster::fanSpeed);
                 }
@@ -97,8 +93,11 @@ void Roaster::update()
                 break;
             }
 
-            if (Roaster::roastPID.compute())
+            if (Roaster::roastPID.isEnabled())
+            {
+                Roaster::outputPID = Roaster::roastPID.compute(Roaster::tAvg);
                 Roaster::heater.set((uint8_t)Roaster::outputPID);
+            }
 
             break;
 
@@ -133,9 +132,9 @@ void Roaster::setMode(Mode m)
             // TODO: add a timeout here
             while(!Roaster::readTemp());
             // Initialize PID variables to room temp
-            Roaster::inputPID = Roaster::tAvg;
             Roaster::profile[0] = Roaster::tAvg;
             Roaster::setpointPID = Roaster::tAvg;
+            Roaster::roastPID.set(Roaster::setpointPID);
             Roaster::interpolateProfile();
             Roaster::roastStage = 0;
             Roaster::roastTime = 0;

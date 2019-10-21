@@ -8,15 +8,15 @@
 #include "Triac_lib.h"
 
 // Placeholder pin definitions, subject to change
-#define DISP_CS 10
-#define DISP_DC 9
-#define DISP_RST 8
+#define DISP_CS 46
+#define DISP_DC 44
+#define DISP_RST 42
 
-#define TC_PIN_1 7
-#define TC_PIN_2 6
+#define TC_PIN_1 18
+#define TC_PIN_2 20
 
-#define HEAT_PIN 5
-#define FAN_PIN 4
+#define HEAT_PIN 4
+#define FAN_PIN 6
 
 // Period in ms to update temperature readings
 #define TC_UPDATE_PERIOD 300
@@ -107,8 +107,8 @@ class Roaster
         static Triac heater, fan;                          // Triacs for heating element and fan
         static uint8_t fanSpeed;                           // Fan power level (0-165)
         static double t1, t2, tAvg;                        // Thermocouple readings
-        static double inputPID, outputPID, setpointPID;    // PID variables
-        static double pGain, iGain, dGain;
+        static int16_t outputPID;
+        static double setpointPID;                         // PID variables
         static PID roastPID;                               // PID controller for heating
 };
 
