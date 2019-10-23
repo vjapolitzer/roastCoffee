@@ -30,7 +30,7 @@ double Roaster::tAvg = 25.0;
 int16_t Roaster::outputPID = 0;
 double Roaster::setpointPID = 25.0;
 
-PID Roaster::stagePID[STAGES] = { PID(100, 1, 0, 0, 165, TC_UPDATE_PERIOD), 
+PID Roaster::stagePID[STAGES] = { PID(80, 1, 1, 0, 100, TC_UPDATE_PERIOD), 
                                   PID(100, 1, 0, 0, 165, TC_UPDATE_PERIOD), 
                                   PID(100, 1, 0, 0, 165, TC_UPDATE_PERIOD)};
 
