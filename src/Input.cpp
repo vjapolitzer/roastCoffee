@@ -126,7 +126,7 @@ void Roaster::handleInput()
                             break;
 
                         case BackB:
-                            Roaster::dispPage = ROASTING_PAGES;
+                            Roaster::dispPage = Roaster::getNumPages();
                             break;
 
                         default:

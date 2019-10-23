@@ -30,8 +30,11 @@ double Roaster::tAvg = 25.0;
 int16_t Roaster::outputPID = 0;
 double Roaster::setpointPID = 25.0;
 
-PID Roaster::roastPID(100, 1, 0,
-                      0, 165, TC_UPDATE_PERIOD);
+PID Roaster::stagePID[STAGES] = { PID(100, 1, 0, 0, 165, TC_UPDATE_PERIOD), 
+                                  PID(100, 1, 0, 0, 165, TC_UPDATE_PERIOD), 
+                                  PID(100, 1, 0, 0, 165, TC_UPDATE_PERIOD)};
+
+uint8_t Roaster::currStage = 0;
 
 void Roaster::begin()
 {
@@ -75,8 +78,9 @@ void Roaster::update()
                 Roaster::setpointPID = Roaster::profile[Roaster::roastStage]
                                        + (Roaster::profileSlope[Roaster::roastStage]
                                           * secondsIntoStage);
-                Roaster::roastPID.set(Roaster::setpointPID);
+                Roaster::setPIDTarget(Roaster::setpointPID);
                 
+                // TODO: make below if case into conditional stage increment block
                 // Ramp down fan to 88% halfway through the roast
                 if (Roaster::roastTime >= Roaster::profileDuration * 30
                     && Roaster::fanSpeed > 146)
@@ -93,9 +97,9 @@ void Roaster::update()
                 break;
             }
 
-            if (Roaster::roastPID.isEnabled())
+            if (Roaster::isPIDEnabled())
             {
-                Roaster::outputPID = Roaster::roastPID.compute(Roaster::tAvg);
+                Roaster::outputPID = Roaster::computePID(Roaster::tAvg);
                 Roaster::heater.set((uint8_t)Roaster::outputPID);
             }
 
@@ -134,18 +138,17 @@ void Roaster::setMode(Mode m)
             // Initialize PID variables to room temp
             Roaster::profile[0] = Roaster::tAvg;
             Roaster::setpointPID = Roaster::tAvg;
-            Roaster::roastPID.set(Roaster::setpointPID);
             Roaster::interpolateProfile();
             Roaster::roastStage = 0;
             Roaster::roastTime = 0;
             Roaster::fanSpeed = 165;
             // And we are off to the races!
             Roaster::fan.on();
-            Roaster::roastPID.start();
+            Roaster::startPIDStage(Roaster::currStage);
             break;
 
         case Cooling:
-            Roaster::roastPID.stop();
+            Roaster::stopPID();
             Roaster::heater.off();
             Roaster::fan.on();
             break;

@@ -36,6 +36,9 @@
 // Cooling temperature target
 #define COOLING_TEMP 50.0
 
+// Number of PID controller stages
+#define STAGES 3
+
 // Number of pages in different modes
 #define MENU_PAGES 3
 #define ROASTING_PAGES 2
@@ -94,6 +97,13 @@ class Roaster
         void drawDisp();
         void drawProfile();
 
+        // Staged Controller functions, defined in Stage.cpp
+        void startPIDStage(uint8_t);
+        void setPIDTarget(double);
+        void stopPID();
+        int16_t computePID(double);
+        bool isPIDEnabled();
+
         static Mode mode;                                  // Current state of machine
         static uint8_t dispPage;                           // Current page of mode to display
         static Button buttonPressed;                       // Holds the status of the buttons
@@ -109,7 +119,8 @@ class Roaster
         static double t1, t2, tAvg;                        // Thermocouple readings
         static int16_t outputPID;
         static double setpointPID;                         // PID variables
-        static PID roastPID;                               // PID controller for heating
+        static PID stagePID[];                               // PID controllers for heating
+        static uint8_t currStage;
 };
 
 #endif
